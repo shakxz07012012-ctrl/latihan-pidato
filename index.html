@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Pidato TTS | Hafalan Inggris</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #b8e1fc 0%, #9ac9e8 100%);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, Helvetica, sans-serif;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Layout utama - lebar responsif, nyaman dibaca */
+        .tts-container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 50, 80, 0.25);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* Header bersih tanpa emoji */
+        .header {
+            background: #eef7ff;
+            padding: 1.8rem 2.5rem;
+            border-bottom: 2px solid #cde5f5;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            color: #0b5a7a;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.4rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: #2c6e8f;
+            font-weight: 450;
+            margin-top: 0.25rem;
+        }
+
+        /* area utama dengan padding lega */
+        .main-panel {
+            padding: 2.2rem 2.5rem;
+        }
+
+        /* label teks */
+        .label-text {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #0f5b78;
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* textarea - jernih dan mudah dibaca */
+        .speech-textarea {
+            width: 100%;
+            min-height: 310px;
+            padding: 1.2rem 1.5rem;
+            font-size: 1.05rem;
+            line-height: 1.65;
+            font-family: 'Courier New', 'Fira Code', 'Menlo', monospace;
+            background-color: #fdfdfe;
+            border: 1.5px solid #cce3ef;
+            border-radius: 1.25rem;
+            resize: vertical;
+            outline: none;
+            transition: 0.2s;
+            color: #1f3f4d;
+            font-weight: 450;
+        }
+
+        .speech-textarea:focus {
+            border-color: #3f9fd7;
+            box-shadow: 0 0 0 4px rgba(63, 159, 215, 0.15);
+        }
+
+        /* toolbar rapi, jarak lega */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin: 1.8rem 0 1.6rem;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            background: #f4fafd;
+            padding: 0.7rem 1.3rem;
+            border-radius: 1.5rem;
+            border: 1px solid #d9ecf5;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2b7a9c;
+        }
+
+        select {
+            background: white;
+            border: 1px solid #bbd4e5;
+            padding: 0.55rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #134b61;
+            cursor: pointer;
+            outline: none;
+            min-width: 190px;
+            font-family: inherit;
+        }
+
+        select:hover {
+            border-color: #3f9fd7;
+        }
+
+        /* slider kecepatan */
+        .speed-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        input[type="range"] {
+            width: 170px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #cde0ea;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="range"]:focus {
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2780a5;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            border: none;
+        }
+
+        .rate-value {
+            font-weight: 600;
+            background: #e1f0f8;
+            padding: 0.25rem 0.7rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            color: #0a5e7e;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        /* button aksi */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        button {
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2.5rem;
+            cursor: pointer;
+            transition: 0.15s;
+            background: #eef3f7;
+            color: #1b5f7a;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .btn-primary {
+            background: #1f7ea3;
+            color: white;
+            box-shadow: 0 6px 12px -8px rgba(26, 100, 130, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: #0f6585;
+            transform: translateY(-1px);
+        }
+
+        .btn-stop {
+            background: #f0f4f7;
+            color: #9b4b4b;
+            border: 1px solid #e0cfcf;
+        }
+
+        .btn-stop:hover {
+            background: #ffe6e6;
+            border-color: #cc9f9f;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        /* info card - tanpa emoji */
+        .info-card {
+            background: #eef5fa;
+            border-radius: 1.2rem;
+            padding: 0.9rem 1.3rem;
+            margin-top: 1.6rem;
+            border-left: 4px solid #4797bb;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #1b5e7a;
+        }
+
+        .tip-text {
+            font-weight: 500;
+        }
+
+        footer {
+            background: #f9feff;
+            border-top: 1px solid #d6e9f2;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.7rem;
+            color: #528aa6;
+        }
+
+        @media (max-width: 750px) {
+            body {
+                padding: 1rem;
+            }
+            .main-panel, .header {
+                padding: 1.5rem;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group {
+                width: 100%;
+            }
+            select {
+                width: 100%;
+            }
+            .action-buttons {
+                justify-content: flex-start;
+                margin-top: 0.3rem;
+            }
+            .speed-slider-row {
+                justify-content: space-between;
+            }
+        }
+
+        /* kejelasan suara */
+        .note-quality {
+            font-size: 0.75rem;
+            color: #3d7f9b;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tts-container">
+    <div class="header">
+        <h1>Pidato Text-to-Speech</h1>
+        <p>Tempelkan naskah pidato bahasa Inggris lalu dengarkan dengan suara jernih</p>
+    </div>
+
+    <div class="main-panel">
+        <div class="label-text">Naskah pidato Inggris</div>
+        <textarea id="speechText" class="speech-textarea" placeholder="Tulis atau tempel teks pidato bahasa Inggris di sini.&#10;Contoh:&#10;Ladies and gentlemen, esteemed teachers, and my dear friends.&#10;Today, I am honored to speak about the importance of self-confidence.&#10;Believe in yourself and never give up on your dreams.&#10;Thank you for your attention.">heloo, everyone.
+
+Let me introduce myself. My name is jibril. You can call me ibill. I'm from Cisurupan.
+
+Today, I believe one thing: being kind is actually cool.
+
+Raise your hand if you've ever been called "too nice" like it's a bad thing.
+
+Yeah, me too. But being kind is not weak. It's brave.
+
+Imagine someone drops their books in the hallway. Everyone laughs. Most people walk away. But one person stops. Helps pick them up. Says, "It's okay."
+
+That person is not weak. That person is strong. Helping someone when others are watching takes guts.
+
+Real strength is not pushing people down. Real strength is lifting people up.
+
+Kind people win in the end. People trust them. People remember them. That's real power.
+
+You don't need money to be kind. Just smile at someone. Say sorry when you're wrong. Text a friend "I'm thinking of you."
+
+Small things. But not weak things.
+
+Kindness spreads. When someone holds the door for you, you hold it for the next person. One small act can travel far.
+
+So here's my challenge: do one kind thing today. Quietly. For no reward.
+
+Because kindness is not weakness. Kindness is courage.
+
+Thank you. My name is jibril. Be kind. It's cool.</textarea>
+        <div class="note-quality">Tips: untuk hasil suara paling jernih, pilih voice "Google UK English" atau "Samantha" (macOS) atau Microsoft David - pastikan bahasa Inggris.</div>
+
+        <div class="toolbar">
+            <div class="control-group">
+                <label>PILIH SUARA (ENGLISH)</label>
+                <select id="voiceSelect"></select>
+            </div>
+
+            <div class="control-group">
+                <label>KECEPATAN BICARA</label>
+                <div class="speed-slider-row">
+                    <span style="font-size:0.8rem;">Pelan</span>
+                    <input type="range" id="rateSlider" min="0.6" max="1.6" step="0.05" value="0.9">
+                    <span style="font-size:0.8rem;">Cepat</span>
+                    <span id="rateValue" class="rate-value">0.90</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="speakBtn" class="btn-primary">Baca Pidato</button>
+                <button id="stopBtn" class="btn-stop">Berhenti</button>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <span class="tip-text">Cara hafal: dengar 1-2 kalimat, tekan berhenti, lalu ulangi dengan suara sendiri.</span>
+            <span>Pilih suara native USA/UK untuk aksen paling jelas</span>
+        </div>
+    </div>
+    <footer>
+        Speech Reader | Fokus pada kejelasan pelafalan Inggris
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // Elemen DOM
+        const textarea = document.getElementById('speechText');
+        const speakBtn = document.getElementById('speakBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const rateSlider = document.getElementById('rateSlider');
+        const rateValue = document.getElementById('rateValue');
+
+        // Variabel speech synth
+        let speechSynth = window.speechSynthesis;
+        let currentUtterance = null;
+        let availableVoices = [];
+        let isPlaying = false;
+
+        // Fungsi untuk populate voice list dengan prioritas suara english yang jernih
+        function populateVoiceList(voices) {
+            availableVoices = voices;
+            // Filter hanya suara dengan bahasa inggris (en-US, en-GB, en-AU dll)
+            let englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+            
+            // Jika tidak ada satupun suara english, pakai semua voice
+            let voiceOptions = englishVoices.length > 0 ? englishVoices : voices;
+            
+            // Urutkan supaya yang lebih natural / terkenal di atas:
+            // prioritas: Google UK, Google US, Samantha, Microsoft, Daniel, dll.
+            const priorityKeywords = ['Google UK', 'Google US', 'Samantha', 'Microsoft David', 'Microsoft Zira', 'Daniel', 'Alex', 'Enhanced'];
+            voiceOptions.sort((a, b) => {
+                let aName = a.name.toLowerCase();
+                let bName = b.name.toLowerCase();
+                let aIndex = priorityKeywords.findIndex(k => aName.includes(k.toLowerCase()));
+                let bIndex = priorityKeywords.findIndex(k => bName.includes(k.toLowerCase()));
+                if (aIndex !== -1 && bIndex === -1) return -1;
+                if (bIndex !== -1 && aIndex === -1) return 1;
+                if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+                return a.lang.localeCompare(b.lang);
+            });
+
+            voiceSelect.innerHTML = '';
+            if (voiceOptions.length === 0) {
+                let option = document.createElement('option');
+                option.textContent = 'Tidak ada suara tersedia';
+                voiceSelect.appendChild(option);
+                return;
+            }
+
+            for (let i = 0; i < voiceOptions.length; i++) {
+                const voice = voiceOptions[i];
+                const option = document.createElement('option');
+                option.value = i;
+                let langLabel = voice.lang.toUpperCase();
+                let nameLabel = voice.name;
+                // tambahkan catatan default / premium
+                option.textContent = `${nameLabel} (${langLabel})`;
+                if (voice.lang === 'en-US' || voice.lang === 'en-GB') {
+                    option.style.fontWeight = '500';
+                }
+                voiceSelect.appendChild(option);
+            }
+            
+            // Default pilih index suara yang paling bagus (prioritas UK/US)
+            let defaultIndex = 0;
+            for (let idx = 0; idx < voiceOptions.length; idx++) {
+                const v = voiceOptions[idx];
+                if (v.lang === 'en-US' && (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Microsoft'))) {
+                    defaultIndex = idx;
+                    break;
+                } else if (v.lang === 'en-GB' && v.name.includes('Google')) {
+                    defaultIndex = idx;
+                    break;
+                } else if (v.lang === 'en-US' && defaultIndex === 0) {
+                    defaultIndex = idx;
+                }
+            }
+            voiceSelect.selectedIndex = defaultIndex;
+        }
+
+        // Memuat daftar voices (browsermu)
+        function loadVoices() {
+            return new Promise((resolve) => {
+                let voices = speechSynth.getVoices();
+                if (voices.length !== 0) {
+                    populateVoiceList(voices);
+                    resolve(voices);
+                } else {
+                    speechSynth.onvoiceschanged = () => {
+                        let newVoices = speechSynth.getVoices();
+                        populateVoiceList(newVoices);
+                        resolve(newVoices);
+                    };
+                    // fallback timeout
+                    setTimeout(() => {
+                        let fallbackVoices = speechSynth.getVoices();
+                        if (fallbackVoices.length) populateVoiceList(fallbackVoices);
+                        resolve(fallbackVoices);
+                    }, 200);
+                }
+            });
+        }
+
+        // Stop total dengan aman
+        function cancelSpeech() {
+            if (speechSynth.speaking || speechSynth.pending) {
+                speechSynth.cancel();
+            }
+            if (currentUtterance) {
+                currentUtterance = null;
+            }
+            isPlaying = false;
+        }
+
+        // Fungsi speak dengan kualitas jernih
+        function speakText() {
+            let textToSpeak = textarea.value.trim();
+            if (!textToSpeak) {
+                alert("Silakan masukkan teks pidato bahasa Inggris terlebih dahulu.");
+                return;
+            }
+
+            // Hentikan suara yang sedang berjalan
+            cancelSpeech();
+
+            // Ambil voice yang dipilih user
+            const selectedVoiceIndex = voiceSelect.value;
+            let selectedVoiceObj = null;
+            
+            // Dapatkan daftar voice yang sudah di-sortir seperti di populate
+            let currentEnglishVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+            let currentSortedVoices = currentEnglishVoices.length > 0 ? currentEnglishVoices : availableVoices;
+            
+            if (currentSortedVoices.length > 0 && selectedVoiceIndex !== undefined && currentSortedVoices[selectedVoiceIndex]) {
+                selectedVoiceObj = currentSortedVoices[selectedVoiceIndex];
+            } else {
+                // fallback cari suara english mana saja
+                let fallbackVoice = availableVoices.find(v => v.lang.startsWith('en'));
+                if (fallbackVoice) selectedVoiceObj = fallbackVoice;
+                else if (availableVoices.length > 0) selectedVoiceObj = availableVoices[0];
+            }
+
+            // Buat utterance
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            if (selectedVoiceObj) {
+                utterance.voice = selectedVoiceObj;
+                utterance.lang = selectedVoiceObj.lang;
+            } else {
+                utterance.lang = 'en-US';
+            }
+            
+            // set rate (kecepatan) dari slider
+            let speed = parseFloat(rateSlider.value);
+            utterance.rate = speed;
+            utterance.pitch = 1.0;   // pitch normal biar natural
+            utterance.volume = 1;     // volume penuh
+            
+            // Event untuk mengetahui ketika selesai
+            utterance.onstart = () => {
+                isPlaying = true;
+            };
+            utterance.onend = () => {
+                currentUtterance = null;
+                isPlaying = false;
+            };
+            utterance.onerror = (event) => {
+                console.warn("Speech error: ", event);
+                currentUtterance = null;
+                isPlaying = false;
+                // jika error karena interupsi atau cancel, tidak perlu alert
+                if (event.error !== 'interrupted' && event.error !== 'canceled') {
+                    console.log("Pastikan browser support TTS");
+                }
+            };
+            
+            currentUtterance = utterance;
+            speechSynth.speak(utterance);
+        }
+
+        // Update tampilan rate
+        function updateRateDisplay() {
+            let val = parseFloat(rateSlider.value).toFixed(2);
+            rateValue.innerText = val;
+        }
+
+        // Event listener
+        speakBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            speakText();
+        });
+        
+        stopBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            cancelSpeech();
+        });
+        
+        rateSlider.addEventListener('input', () => {
+            updateRateDisplay();
+            // Perubahan kecepatan tidak mengganggu bacaan aktif, 
+            // tapi jika perlu bisa di-restart untuk suara langsung berubah? 
+            // tidak di restart agar tidak mengganggu, tetapi untuk bacaan selanjutnya menggunakan rate baru
+            // jika ingin agar kecepatan berubah untuk bacaan yang sedang aktif: 
+            // kita bisa biarkan apa adanya (default chrome mengabaikan perubahan rate saat speaking)
+        });
+        
+        // Inisiasi voices
+        window.addEventListener('load', () => {
+            loadVoices().then(() => {
+                updateRateDisplay();
+                // memastikan tombol stop berfungsi di semua kondisi
+                if (speechSynth) {
+                    // tambahan agar saat halaman ditutup tidak error
+                }
+            });
+        });
+        
+        // Fallback khusus chrome untuk onvoiceschanged yang kadang tidak terpanggil
+        if (typeof speechSynth !== 'undefined' && speechSynth.onvoiceschanged !== undefined) {
+            speechSynth.onvoiceschanged = () => {
+                let newVoiceList = speechSynth.getVoices();
+                if (newVoiceList.length) {
+                    populateVoiceList(newVoiceList);
+                }
+            };
+        }
+    })();
+</script>
+</body>
+</html>
